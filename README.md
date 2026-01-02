@@ -1,6 +1,4 @@
 # VMA451 Library for Raspberry Pi Pico
-VMA451 16x8 Leds Matrix (aip1640/tm1640 drivers) - C/C++ Raspberry PICO library
-------------------
 
 This is a C++ library for controlling the VMA451 16x8 LED Matrix Display (based on the AiP1640 driver) using a Raspberry Pi Pico.
 
@@ -8,7 +6,9 @@ This is a C++ library for controlling the VMA451 16x8 LED Matrix Display (based 
 
 *   **16x8 LED Matrix Control**: Individually control columns or display text.
 *   **Brightness Control**: Adjustable brightness levels (0-7).
-*   **Text Display**: Built-in support for displaying numbers, minus sign, and decimal points.
+*   **Text Display**: Built-in support for displaying numbers, minus sign, and decimal points into the 5 bottom rows of the display.
+*   **Symbol Display**: Add custom symbols to the top 3 rows of the display, aligned on the right side.
+*   **Buffer System**: Prepare frames in a buffer before displaying them.
 *   **Simple Interface**: Uses a custom 2-wire serial protocol (CLK, DIO).
 
 ## Hardware Connection
@@ -20,40 +20,9 @@ Connect the VMA451 module to the Raspberry Pi Pico:
 *   **VCC**: 3.3V or 5V.
 *   **GND**: Ground.
 
-## Supported Characters
+## Documentation
 
-The `display_numbers` method currently supports a limited character set optimized for 2x5 pixel fonts:
-*   Numbers: `0` - `9`
-*   Symbols: `-` (minus), `.` (dot)
-*   Space
-
-## API Documentation
-
-### Constructor
-```cpp
-VMA451(uint8_t clk_pin, uint8_t dio_pin);
-```
-Initializes the display with the specified Clock (CLK) and Data (DIO) pins.
-
-### Methods
-
-#### `void set_brightness(uint8_t brightness)`
-Sets the display brightness.
-*   `brightness`: A value from 0 (dimmest) to 7 (brightest).
-
-#### `void display_numbers(const char* str, const bool clear_after = true)`
-Displays a string of numbers on the matrix.
-*   `str`: The string to display (e.g., "12.34", "-5").
-*   `clear_after`: If `true` (default), clears any remaining columns after the string.
-*   Note: The string is truncated if it exceeds the display width.
-
-#### `void display_column(uint8_t colID, uint8_t byte)`
-Sets the state of a specific column.
-*   `colID`: The column index (0-15).
-*   `byte`: The 8-bit value representing the row LEDs for that column (LSB is top).
-
-#### `void clear()`
-Clears the entire display (turns off all LEDs).
+Full API documentation is available in [DOC-API.md](DOC-API.md).
 
 ## Example Usage
 
@@ -78,12 +47,17 @@ int main() {
 
     while (true) {
         // Display a number
-        display.display_numbers("12.34", true);
+        display.display_numbers("12.34");
         sleep_ms(2000);
+        
+        // Clear
+        display.clear();
+        sleep_ms(500);
     }
 
     return 0;
 }
+```
 
 ## License
 

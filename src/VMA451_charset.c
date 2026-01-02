@@ -2,8 +2,8 @@
 #include <stddef.h>
 
 
-// On utilise 'const' pour que cela reste en mémoire Flash (si microcontrôleur)
-// Format : Chaque octet est une colonne verticale. LSB (bit 0) en haut.
+// Using CONST to store character data in flash memory
+// Format : each byte is a column of 8 pixels (LSB at top)
 const uint8_t numbers[][2] = {
     ///// NUMBER 0 ////////
     // ## // Full 2x5 block
@@ -128,7 +128,9 @@ const uint8_t numbers[][2] = {
     }
 };
 
-// Fonction helper pour récupérer le pointeur vers le bon caractère
+// Get character data for number 0-9, minus sign and dot
+// By default, the character is aligned to the bottom of the 8-pixel height
+// offsetH: vertical offset in pixels, 0 = top, default 3 = bottom (5+3 = 8bits)
 const uint8_t* getNumber2x5(char c, uint8_t offsetH, uint8_t *out_len) {
     static uint8_t charNum[3];
     const uint8_t *src = NULL;
@@ -156,3 +158,50 @@ const uint8_t* getNumber2x5(char c, uint8_t offsetH, uint8_t *out_len) {
     
     return charNum;
 }
+
+////////////////////////////////////////////////
+// Additional symbols for environmental data display
+////////////////////////////////////////////////
+// By default, symbols are aligned to the top of the 8-pixel height
+////////////////////////////////////////////////
+const uint8_t symbol_degree_3x4[4] =
+    ///// °C //////////////
+    // #.## //
+    // ..#. // 
+    // ..## //
+    ///////////////////////
+    {
+        0b001,
+        0b000,
+        0b111,
+        0b101,
+    };
+const uint8_t symbol_humidity_3x3[3] =
+    ///// H //////////////
+    // #.# //
+    // ### //
+    // #.# //
+    ///////////////////////
+    {
+        0b111,
+        0b010,
+        0b111,
+    };
+const uint8_t symbol_ppm_2x11[11] =
+    ///// PPM //////////////
+    // ##.##.##### //
+    // #..#..#.#.# //
+    ///////////////////////
+    {
+        0b11,
+        0b01,
+        0b00,
+        0b11,
+        0b01,
+        0b00,
+        0b11,
+        0b01,
+        0b11,
+        0b01,
+        0b11,
+    };

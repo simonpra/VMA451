@@ -22,7 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "VMA451_charset.c"
+#include "VMA451_charset.h"
 
 // VMA451 commands
 #define VMA451_CMD_SET_DATA    0x40
@@ -188,7 +188,7 @@ void VMA451::display_column(uint8_t colID, uint8_t byte) {
  * This function ensures that the current display image stored in _buffer
  * is shown on the VMA451 LED matrix in a single operation.
  ******************************************************/
-void VMA451::_write_buffer() {
+void VMA451::display_buffer() {
     // Set incremental address mode
     _start_CMD();
     _write_byte(VMA451_CMD_SET_DATA | VMA451_INCR_ADDR);
@@ -205,7 +205,7 @@ void VMA451::_write_buffer() {
 }
 
 /******************************************************
- * Display number 0-9 with . separator and - sign (12.5, -3.0, 0-9, etc.)
+ * Set the _buffer with number 0-9 with . separator and - sign (12.5, -3.0, 0-9, etc.)
  * Number and - characters are 2x5 pixels + 1x5 pixel spacer.
  * Dot is 1x5 pixels + 1x5 pixel spacer.
  * @param str The input string to display, containing numeric characters and symbols.
@@ -219,8 +219,9 @@ void VMA451::_write_buffer() {
  * TODO: Implement scrolling for longer strings.
  * 
  * Any unused columns in the display are cleared based on the clear_after parameter.
+ * Characters are offset from top by 3bits 0x000 to be aligned to bottom of the VMA451 8-pixel height.
  ******************************************************/
-void VMA451::display_numbers(const char* str, const bool clear_after) {
+void VMA451::set_buffer_numbers(const char* str, const bool clear_after) {
     // size_t is "native" 32-bits unsigned integer type
     // better for use inside cpu functions and loops
     // as it matches the cpu 32-bits architecture
@@ -247,7 +248,49 @@ void VMA451::display_numbers(const char* str, const bool clear_after) {
             _buffer[colID] = 0x00;
         }
     }
-    _write_buffer();
+}
+
+/******************************************************
+ * Set a symbol at the top-right corner of the display buffer.
+ *
+ * This function places a given symbol bitmap into the display buffer,
+ * aligning it to the right side of the display.
+ * Using bitwise OR (|) operation to merge the symbol data
+ * with existing buffer content, while preserving the lower
+ * 5 bits of each column, where numbers are displayed.
+ *
+ * @param symbol Pointer to the symbol bitmap array.
+ *               From VMA451_charset.h :
+ *               - symbol_degree_3x4 for °C (4 columns)
+ *               - symbol_ppm_2x11 for PPM (11 columns)
+ *               - symbol_humidity_3x3 for %H (3 columns)
+ * @param symbol_len Length of the symbol bitmap array.
+ *
+ ******************************************************/
+void VMA451::set_buffer_symbol(const uint8_t* symbol, size_t symbol_len) {
+    // Set symbol from the end of the buffer/screen
+    size_t start_col = sizeof(_buffer) - symbol_len;
+    for (size_t i = 0; i < symbol_len; i++) {
+        // 3 first bits of column _buffer are reserved for the symbol 0x000
+        // Only the 3 first bits are used for the symbol (3x4, 2x11, 3x3)
+        // So we use OR operation to preserve the lower 5 bits of the existing buffer content
+        _buffer[start_col + i] |= symbol[i];
+    }
+}
+
+/******************************************************
+ * Helper to display number 0-9 with . separator and - sign (12.5, -3.0, 0-9, etc.)
+ * Number and - characters are 2x5 pixels + 1x5 pixel spacer.
+ * Dot is 1x5 pixels + 1x5 pixel spacer.
+ * @param str The input string to display, containing numeric characters and symbols.
+ * @param clear_after If true, clears the remaining display columns after writing the string.
+ *
+ * Call set_buffer_numbers to populate the internal _buffer,then write it to the display.
+ * @see set_buffer_numbers for details on character processing and buffer management.
+ ******************************************************/
+void VMA451::display_numbers(const char* str, const bool clear_after) {
+    set_buffer_numbers(str, clear_after);
+    display_buffer();
 }
 
 void VMA451::clear() {

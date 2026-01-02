@@ -17,6 +17,9 @@ public:
     void set_brightness(uint8_t brightness);
     void display_column(uint8_t colID, uint8_t byte);
     void display_numbers(const char* str, const bool clear_after = true);
+    void set_buffer_numbers(const char* str, const bool clear_after = true);
+    void set_buffer_symbol(const uint8_t* symbol, size_t symbol_len);
+    void display_buffer();
     void clear();
 
 private:
@@ -28,7 +31,6 @@ private:
     void _start_CMD();
     void _stop_CMD();
     void _write_byte(uint8_t byte);
-    void _write_buffer();
     void _fixed_address_CMD();
 };
 
