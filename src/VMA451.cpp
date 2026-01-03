@@ -133,6 +133,8 @@ void VMA451::_write_byte(uint8_t byte) {
         sleep_us(SLEEP_US_DELAY);
     }
     // NO ACK handling, it finishes after 8 bits
+    gpio_put(_clk_pin, 0);
+    sleep_us(SLEEP_US_DELAY);
 }
 
 void VMA451::set_brightness(uint8_t brightness) {
