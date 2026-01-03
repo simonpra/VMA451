@@ -2,6 +2,9 @@
 
 This is a C++ library for controlling the VMA451 16x8 LED Matrix Display (based on the AiP1640 driver) using a Raspberry Pi Pico.
 
+
+<img src="IMGs/VMA451-AiP1640_front.jpg" width="45%"> <img src="IMGs/VMA451-AiP1640_back.jpg" width="45%">
+
 ## Features
 
 *   **16x8 LED Matrix Control**: Individually control columns or display text.
