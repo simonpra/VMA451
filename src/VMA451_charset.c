@@ -132,29 +132,53 @@ const uint8_t numbers[][2] = {
 // By default, the character is aligned to the bottom of the 8-pixel height
 // offsetH: vertical offset in pixels, 0 = top, default 3 = bottom (5+3 = 8bits)
 const uint8_t* getNumber2x5(char c, uint8_t offsetH, uint8_t *out_len) {
-    static uint8_t charNum[3];
+    static uint8_t charNum[5] = {0,0,0,0,0}; // Max 5 = %
     const uint8_t *src = NULL;
-    uint8_t src_len = 0;
+    uint8_t src_len = 0; // set to 1 for default spacer if no match
 
-    // Initialize with 0 (default space)
-    charNum[0] = 0; charNum[1] = 0; charNum[2] = 0;
+    // Clear previous data
+    for(size_t i=0; i<sizeof(charNum); i++) {
+        charNum[i] = 0x00;
+    }
 
-    if (c >= '0' && c <= '9') { src = numbers[c - '0']; src_len = 2; }
-    else if (c == '-') { src = numbers[10]; src_len = 2; }
+    if (c >= '0' && c <= '9') {
+        src = numbers[c - '0'];
+        src_len = 2;
+    }
+    else if (c == '-') {
+        src = numbers[10]; src_len = 2;
+    }
     else if (c == '.') {
         static const uint8_t dot[1] = {0b10000};
         src = dot;
         src_len = 1;
     }
+    else if( c == '%' ) {
+        // Special case for percent sign % : 4x5
+        // ....
+        // #..#
+        // ..#.
+        // .#..
+        // #..#
+        static const uint8_t percent[5] = {
+            0b00000,
+            0b10010,
+            0b01000,
+            0b00100,
+            0b10010
+        };
+        src = percent;
+        src_len = 5;
+    }
 
     if (src) {
-        for(uint8_t i=0; i<src_len; i++) {
+        for(size_t i=0; i<src_len; i++) {
             charNum[i] = src[i] << offsetH;
         }
     }
 
-    // Return total length: source length + 1 spacer
-    *out_len = src_len + 1;
+    // Return total length
+    *out_len = (c=='%') ? src_len : src_len + 1;
     
     return charNum;
 }
