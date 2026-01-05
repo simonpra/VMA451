@@ -19,6 +19,7 @@ public:
     void display_numbers(const char* str, const bool clear_after = true);
     void set_buffer_numbers(const char* str, const bool clear_after = true);
     void set_buffer_symbol(const uint8_t* symbol, size_t symbol_len);
+    void set_buffer_raw(const uint8_t* buffer, size_t length);
     void display_buffer();
     void clear();
 

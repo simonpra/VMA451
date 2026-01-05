@@ -48,7 +48,7 @@
 #define VMA451_PX_WIDTH       16
 #define VMA451_PX_HEIGHT      8
 
-#define SLEEP_US_DELAY        2
+#define SLEEP_US_DELAY        1
 
 /******************************************************
  * @class VMA451
@@ -277,6 +277,30 @@ void VMA451::set_buffer_symbol(const uint8_t* symbol, size_t symbol_len) {
         // Only the 3 first bits are used for the symbol (3x4, 2x11, 3x3)
         // So we use OR operation to preserve the lower 5 bits of the existing buffer content
         _buffer[start_col + i] |= symbol[i];
+    }
+}
+
+/******************************************************
+ * Sets the display buffer with raw byte data.
+ *
+ * Copies the provided raw buffer directly into the internal _buffer.
+ * If the input buffer is shorter than the display width (16 columns),
+ * the remaining columns are cleared. If the input buffer is longer,
+ * only the first 16 bytes are copied.
+ *
+ * @param buffer Pointer to the raw byte data array.
+ * @param length The number of bytes to copy from the buffer.
+ *
+ * @note This function provides direct, unprocessed access to the display buffer,
+ * allowing custom patterns and bitmap data to be displayed.
+ ******************************************************/
+void VMA451::set_buffer_raw(const uint8_t* buffer, size_t length) {
+    // Copy raw buffer data into internal _buffer
+    size_t copy_length = (length < sizeof(_buffer)) ? length : sizeof(_buffer);
+    memcpy(_buffer, buffer, copy_length);
+    // Clear remaining columns if input buffer is shorter than _buffer
+    for (size_t i = copy_length; i < sizeof(_buffer); i++) {
+        _buffer[i] = 0x00;
     }
 }
 
