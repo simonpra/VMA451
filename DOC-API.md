@@ -24,7 +24,19 @@ Sets the display brightness.
     *   `brightness`: A value between `0` (dimmest) and `7` (brightest).
 
 #### `void clear()`
-Clears the entire display (sets all pixels to off) and clears the internal buffer.
+Clears the entire display (sets all pixels to off).
+
+*   **Note:** This function loops through all columns and sets them to 0. It does NOT clear the internal buffer. To clear the buffer, use `set_buffer_raw` with zeros or `set_buffer_numbers("")`.
+
+#### `void flip_display_horizontal()`
+Toggles the horizontal orientation of the display.
+
+*   **Note:** Affects both `display_buffer()` and `display_column()`. When enabled, column 0 becomes column 15, etc.
+
+#### `void flip_display_vertical()`
+Toggles the vertical orientation of the display.
+
+*   **Note:** Affects both `display_buffer()` and `display_column()`. When enabled, the bit order of each column byte is reversed (top pixel becomes bottom pixel).
 
 ---
 
@@ -44,7 +56,7 @@ Manually updates a single column on the display.
 *   **Parameters:**
     *   `colID`: The column index (0-15).
     *   `byte`: The 8-bit data for the column (LSB is the top pixel).
-*   **Note:** This uses "Fixed Address" mode to update only one register without rewriting the whole display.
+*   **Note:** This uses "Fixed Address" mode to update only one register without rewriting the whole display. Respects the current horizontal and vertical flip settings.
 
 ---
 
@@ -68,6 +80,16 @@ Writes a custom raw byte sequence (symbol) to the internal buffer.
     *   `symbol_len`: The number of columns to write.
 *   **Note:** Writes into the first 3 bits of each column, starting from the end. Meaning symbol will be top-right of the display.
 
+#### `void set_buffer_raw(const uint8_t* buffer, size_t length)`
+Copies raw byte data directly into the internal display buffer.
+
+*   **Parameters:**
+    *   `buffer`: Pointer to the raw byte data array.
+    *   `length`: The number of bytes to copy.
+*   **Note:** If `length` is less than 16, the remaining columns in the internal buffer are cleared (set to 0). Useful for custom graphics.
+
 #### `void display_buffer()`
 Sends the contents of the internal buffer to the display.
 This updates all 16 columns of the display at once.
+
+*   **Note:** Respects the current horizontal and vertical flip settings.

@@ -66,6 +66,7 @@
  * - Management of display data using incremental or fixed addressing modes.
  * - Convenient methods to display numeric values and symbols.
  * - Compatibility with a column-by-column or full-buffer update approach.
+ * - Support for horizontal and vertical display flipping.
  *
  * Example usage:
  * @code
@@ -79,7 +80,9 @@ VMA451::VMA451(uint8_t clk_pin, uint8_t dio_pin) :
     _clk_pin(clk_pin),
     _dio_pin(dio_pin),
     _brightness(0x04),
-    _buffer{0}
+    _buffer{0},
+    _flipH(false),
+    _flipV(false)
 {
     gpio_init(_clk_pin);
     gpio_init(_dio_pin);
@@ -118,6 +121,23 @@ void VMA451::_stop_CMD() {
     gpio_put(_dio_pin, 1);
     sleep_us(SLEEP_US_DELAY);
     // CLK can remain high
+}
+
+/******************************************************
+ * Reverses the bit order of a byte.
+ *
+ * This function reverses all 8 bits in the input byte. The least significant bit
+ * becomes the most significant bit and vice versa.
+ * Used internally to flip the display vertically when _flipV is enabled.
+ *
+ * @param b The byte to reverse.
+ * @return The byte with reversed bit order.
+ ******************************************************/
+uint8_t VMA451::_reverse_byte(uint8_t b) {
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
 }
 
 void VMA451::_write_byte(uint8_t byte) {
@@ -173,7 +193,13 @@ void VMA451::display_column(uint8_t colID, uint8_t byte) {
     _start_CMD();
     // colID = colID & 0x0F; // 16 columns max
     _write_byte(VMA451_CMD_SET_ADDR | colID & 0x0F);
-    _write_byte(byte);
+    
+    if( _flipH)
+        colID = 15 - colID;
+    if( _flipV)
+        byte = _reverse_byte(byte);
+        
+    _write_byte( byte );
     _stop_CMD();
 }
 
@@ -201,7 +227,10 @@ void VMA451::display_buffer() {
     _write_byte(VMA451_CMD_SET_ADDR | 0x00);
     // Write all bytes from buffer
     for (size_t i = 0; i < 16; i++) {
-        _write_byte(_buffer[i]);
+        size_t j = _flipH ? 15 - i : i;
+        uint8_t byte = _flipV ? _reverse_byte(_buffer[j]) : _buffer[j];
+
+        _write_byte( byte );
     }
     _stop_CMD();
 }
@@ -323,4 +352,12 @@ void VMA451::clear() {
     for (size_t i = 0; i < 16; i++) {
         display_column(i, 0x00);
     }
+}
+
+void VMA451::flip_display_horizontal() {
+    _flipH = !_flipH;
+}
+
+void VMA451::flip_display_vertical() {
+    _flipV = !_flipV;
 }

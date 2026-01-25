@@ -11,7 +11,8 @@ This is a C++ library for controlling the VMA451 16x8 LED Matrix Display (based 
 *   **Brightness Control**: Adjustable brightness levels (0-7).
 *   **Text Display**: Built-in support for displaying numbers, minus sign, decimal points, and % into the 5 bottom rows of the display.
 *   **Symbol Display**: Add custom symbols to the top 3 rows of the display, aligned on the right side.
-*   **Buffer System**: Prepare frames in a buffer before displaying them.
+*   **Display Flipping**: Software support for horizontal (mirror) and vertical (upside-down) flipping.
+*   **Buffer System**: Prepare frames in a buffer before displaying them. Includes raw buffer access for custom graphics.
 *   **Simple Interface**: Uses a custom 2-wire serial protocol (CLK, DIO).
 
 <img src="IMGs/VMA451_temperature+humidity.jpg" width="100%">

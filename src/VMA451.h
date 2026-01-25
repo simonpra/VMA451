@@ -22,17 +22,22 @@ public:
     void set_buffer_raw(const uint8_t* buffer, size_t length);
     void display_buffer();
     void clear();
+    void flip_display_horizontal();
+    void flip_display_vertical();
 
 private:
     uint8_t _clk_pin;
     uint8_t _dio_pin;
     uint8_t _brightness;
     uint8_t _buffer[16];
+    bool    _flipH;
+    bool    _flipV;
 
     void _start_CMD();
     void _stop_CMD();
     void _write_byte(uint8_t byte);
     void _fixed_address_CMD();
+    uint8_t _reverse_byte(uint8_t b);
 };
 
 #endif
